@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudyBuddy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,800;9..144,900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<style>
+:root{--paper:#f3f2ea;--line:#e0ded0;--ink:#1c2321;--yellow:#ffd85c;--green:#c9f28a;--purple:#c9a8ff;--pink:#ffb3c7;--sky:#a6d8ff}
+*{box-sizing:border-box}
+body{margin:0;background-color:var(--paper);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:28px 28px;color:var(--ink);font-family:"Space Mono",ui-monospace,Menlo,monospace;font-size:15px;line-height:1.6}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 20px 60px}
+h1,h2{font-family:Fraunces,Georgia,serif;font-weight:900;line-height:1;margin:0}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{font-size:34px}
+.badge{width:104px;height:104px;flex:none}
+.spin{transform-origin:60px 60px;animation:spin 16s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.intro{max-width:520px;margin:6px 0 34px}
+.collage{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;align-items:center;padding:6px 0 0}
+.card{border:2.5px solid var(--ink);border-radius:18px;height:250px;overflow:hidden;position:relative;box-shadow:5px 5px 0 var(--ink);transition:transform .25s}
+.card:hover{transform:rotate(0) translateY(-6px)!important}
+.card h2{position:absolute;left:0;right:0;text-align:center;font-size:30px}
+.c1{background:#1c2321;color:var(--paper);transform:rotate(-4deg)}
+.c2{background:var(--paper);transform:rotate(2deg);margin-top:14px}
+.c3{background:var(--sky);transform:rotate(-2deg);margin-top:-6px}
+.c4{background:#fff;transform:rotate(4deg);margin-top:16px;padding:14px}
+.card svg{position:absolute;left:0;bottom:0;width:100%}
+.c1 h2{top:14px}.c2 h2{top:14px}.c3 h2{top:14px}
+.row{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.row i{width:22px;height:22px;border:2px solid var(--ink);border-radius:50%;flex:none}
+.row b{height:8px;border-radius:4px;background:var(--line);flex:1}
+.stickers{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:-16px 0 34px;position:relative}
+.sticker{font:700 13px "Space Mono",monospace;color:var(--ink);border:2px solid var(--ink);border-radius:10px;padding:8px 12px;box-shadow:3px 3px 0 var(--ink);cursor:pointer;transition:transform .15s,box-shadow .15s}
+.sticker:hover{transform:rotate(0) translate(-2px,-2px)!important;box-shadow:5px 5px 0 var(--ink)}
+.sticker:active{transform:translate(2px,2px)!important;box-shadow:1px 1px 0 var(--ink)}
+button:focus-visible,textarea:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+.modes{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.mode{font:700 14px "Space Mono",monospace;background:#fff;color:var(--ink);border:2px solid var(--ink);border-radius:10px;padding:8px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+.mode[aria-pressed=true]{background:var(--yellow);transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+#modeNote{margin:0 0 14px;max-width:640px}
+.chat{background:#fff;border:2.5px solid var(--ink);border-radius:18px;box-shadow:6px 6px 0 var(--ink);overflow:hidden}
+#log{height:380px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;background:rgba(243,242,234,.5)}
+.msg{max-width:82%}
+.msg.user{align-self:flex-end}
+.bubble{border:2px solid var(--ink);border-radius:14px;padding:10px 14px;white-space:pre-wrap;word-wrap:break-word}
+.user .bubble{background:var(--green);border-bottom-right-radius:3px}
+.bot .bubble{background:#fff;border-bottom-left-radius:3px}
+.bubble.typing{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.45}}
+.bubble.err{background:var(--pink)}
+.tag{display:inline-block;background:var(--purple);border:2px solid var(--ink);border-radius:8px;padding:0 8px;font-size:12px;font-weight:700;margin:0 0 6px;transform:rotate(-2deg)}
+.showp{background:none;border:0;font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;color:var(--ink);padding:6px 0 0}
+pre.prompt{margin:6px 0 0;background:var(--ink);color:var(--green);border-radius:10px;padding:12px;font-size:12px;overflow-x:auto;white-space:pre-wrap}
+.bar{display:flex;gap:10px;padding:14px;border-top:2.5px solid var(--ink);background:var(--yellow)}
+textarea{flex:1;resize:none;font:inherit;border:2px solid var(--ink);border-radius:10px;padding:10px 12px;background:#fff;height:48px}
+.send{font:700 14px "Space Mono",monospace;background:var(--ink);color:var(--paper);border:2px solid var(--ink);border-radius:10px;padding:0 20px;cursor:pointer}
+.send:disabled{opacity:.5;cursor:wait}
+.clear{background:none;border:0;font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;margin-top:12px;color:var(--ink)}
+.msg.bot{max-width:94%}
+.bubble.md{white-space:normal;line-height:1.55}
+.md>*:first-child{margin-top:0}.md>*:last-child{margin-bottom:0}
+.md h1,.md h2,.md h3,.md h4{font-family:Fraunces,Georgia,serif;font-weight:900;line-height:1.15;margin:16px 0 8px}
+.md h1{font-size:22px}.md h2{font-size:19px}.md h3,.md h4{font-size:16px}
+.md p{margin:0 0 10px}
+.md ul,.md ol{margin:0 0 10px;padding-left:22px}.md li{margin:3px 0}
+.md hr{border:0;border-top:2px dashed var(--ink);margin:14px 0}
+.md strong{font-weight:700;background:linear-gradient(transparent 60%,var(--yellow) 60%)}
+.md code{background:var(--line);border-radius:4px;padding:1px 5px;font-size:13px}
+.md pre{background:var(--ink);color:var(--green);border-radius:10px;padding:12px;overflow-x:auto}
+.md pre code{background:none;padding:0;color:inherit}
+.tw{overflow-x:auto;margin:0 0 12px;border:2px solid var(--ink);border-radius:10px}
+.md table{border-collapse:collapse;font-size:13px;min-width:100%}
+.md th,.md td{border:1px solid var(--ink);padding:6px 10px;text-align:left;vertical-align:top;min-width:110px}
+.md th{background:var(--yellow)}
+.md tr:nth-child(even) td{background:var(--paper)}
+@media(max-width:820px){.collage{grid-template-columns:repeat(2,1fr)}.c2,.c4{margin-top:0}}
+@media(prefers-reduced-motion:reduce){.spin,.bubble.typing{animation:none}.card,.sticker{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="logo">StudyBuddy</h1>
+    <svg class="badge" viewBox="0 0 120 120" role="img" aria-label="Smiley badge">
+      <defs>
+        <path id="ring" d="M60,60 m-47,0 a47,47 0 1,1 94,0 a47,47 0 1,1 -94,0"/>
+        <radialGradient id="g" cx=".35" cy=".3"><stop offset="0" stop-color="#ffb3c7"/><stop offset=".55" stop-color="#c9a8ff"/><stop offset="1" stop-color="#c9f28a"/></radialGradient>
+      </defs>
+      <g class="spin"><text font-family="Space Mono,monospace" font-weight="700" font-size="11"><textPath href="#ring" textLength="292" lengthAdjust="spacing">ask away * ask away * ask away * ask away *</textPath></text></g>
+      <circle cx="60" cy="60" r="30" fill="url(#g)" stroke="#1c2321" stroke-width="2.5"/>
+      <circle cx="50" cy="54" r="3" fill="#1c2321"/><circle cx="70" cy="54" r="3" fill="#1c2321"/>
+      <path d="M46 66 Q60 80 74 66" fill="none" stroke="#1c2321" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </header>
+  <p class="intro">Ask a study question, then switch the prompting style and watch the answer change.</p>
+
+  <section class="collage" aria-hidden="true">
+    <div class="card c1"><h2>Exam<br>week</h2>
+      <svg viewBox="0 0 120 110"><path d="M12 40 Q38 28 60 40 Q82 28 108 40 V96 Q82 84 60 96 Q38 84 12 96Z" fill="#f3f2ea" stroke="#ffd85c" stroke-width="3"/><path d="M60 40V96" stroke="#1c2321" stroke-width="2.5"/><path d="M22 54 Q40 48 52 54M22 66 Q40 60 52 66M68 54Q80 48 98 54M68 66Q80 60 98 66" stroke="#1c2321" stroke-width="2" fill="none"/><path d="M96 14l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#ffd85c"/></svg></div>
+    <div class="card c2" style="background:#c9f28a"><h2>Let it click</h2>
+      <svg viewBox="0 0 120 110"><path d="M60 110V72" stroke="#1c2321" stroke-width="3"/><path d="M60 100Q40 96 34 82Q52 84 60 96" fill="#7fc24a" stroke="#1c2321" stroke-width="2.5"/><g transform="translate(60,52)" stroke="#1c2321" stroke-width="2.5" fill="#fff"><ellipse cy="-20" rx="12" ry="19"/><ellipse cy="-20" rx="12" ry="19" transform="rotate(60)"/><ellipse cy="-20" rx="12" ry="19" transform="rotate(120)"/><ellipse cy="-20" rx="12" ry="19" transform="rotate(180)"/><ellipse cy="-20" rx="12" ry="19" transform="rotate(240)"/><ellipse cy="-20" rx="12" ry="19" transform="rotate(300)"/><circle r="11" fill="#ffb14a"/></g></svg></div>
+    <div class="card c3"><h2>Big ideas</h2>
+      <svg viewBox="0 0 120 110"><g fill="#1c2321"><circle cx="16" cy="60" r="1.8"/><circle cx="104" cy="52" r="1.8"/><circle cx="30" cy="84" r="1.4"/><circle cx="98" cy="88" r="1.4"/></g><ellipse cx="60" cy="74" rx="52" ry="11" fill="none" stroke="#1c2321" stroke-width="3" transform="rotate(-14 60 74)"/><circle cx="60" cy="74" r="26" fill="#ffb3c7" stroke="#1c2321" stroke-width="3"/><path d="M36 68Q60 78 84 62" stroke="#c9a8ff" stroke-width="7" fill="none"/><path d="M8 84Q60 96 112 66" fill="none" stroke="#1c2321" stroke-width="3" transform="rotate(-14 60 74)" clip-path="inset(50% 0 0 0)"/></svg></div>
+    <div class="card c4"><h2 style="position:static;font-size:24px;text-align:left;margin-bottom:16px">Quick FAQ</h2>
+      <div class="row"><i style="background:var(--yellow)"></i><b></b></div><div class="row"><i style="background:var(--purple)"></i><b></b></div><div class="row"><i style="background:var(--green)"></i><b></b></div><div class="row"><i style="background:var(--pink)"></i><b></b></div>
+      <div style="border:2px solid var(--ink);border-radius:10px;background:var(--yellow);padding:6px 10px;font-weight:700;font-size:13px;transform:rotate(-2deg)">75% attendance</div></div>
+  </section>
+
+  <div class="stickers" id="stickers">
+    <button class="sticker" style="background:var(--yellow);transform:rotate(-3deg)">Explain overfitting simply</button>
+    <button class="sticker" style="background:var(--green);transform:rotate(2deg)">What is a stack?</button>
+    <button class="sticker" style="background:var(--purple);transform:rotate(-2deg)">What is the minimum attendance?</button>
+    <button class="sticker" style="background:var(--pink);transform:rotate(3deg)">How should I plan my revision?</button>
+  </div>
+
+  <div class="modes" id="modes" role="group" aria-label="Prompting style">
+    <button class="mode" data-mode="zero_shot" aria-pressed="true">Zero-shot</button>
+    <button class="mode" data-mode="few_shot" aria-pressed="false">Few-shot</button>
+    <button class="mode" data-mode="role" aria-pressed="false">Role</button>
+    <button class="mode" data-mode="faq" aria-pressed="false">FAQ assistant</button>
+  </div>
+  <p id="modeNote"></p>
+
+  <div class="chat">
+    <div id="log" aria-live="polite"></div>
+    <div class="bar">
+      <textarea id="input" placeholder="Type your question and press Enter" aria-label="Your question"></textarea>
+      <button class="send" id="send">Send</button>
+    </div>
+  </div>
+  <button class="clear" id="clear">Clear chat</button>
+</div>
+
+<script>
+const API = "http://localhost:5000/api/chat";
+const INFO = {
+  zero_shot: ["Zero-shot", "Your question goes straight to the model with no examples and no persona. This is the baseline."],
+  few_shot: ["Few-shot", "Two example answers are sent first, so the model copies their Definition / Example / Key point format."],
+  role: ["Role", "A system prompt makes the model act as a patient study tutor with a fixed answer style."],
+  faq: ["FAQ", "The best matching FAQ entries are added to the prompt, and the model answers only from them."]
+};
+let mode = "zero_shot", busy = false;
+const log = document.getElementById("log"), input = document.getElementById("input"), sendBtn = document.getElementById("send");
+
+function note(){ document.getElementById("modeNote").textContent = INFO[mode][1]; }
+function add(role, text, tag){
+  const m = document.createElement("div"); m.className = "msg " + role;
+  if (tag){ const t = document.createElement("span"); t.className = "tag"; t.textContent = tag; m.appendChild(t); }
+  const b = document.createElement("div"); b.className = "bubble"; b.textContent = text; m.appendChild(b);
+  log.appendChild(m); log.scrollTop = log.scrollHeight;
+  return m;
+}
+function addPromptToggle(m, prompt){
+  const btn = document.createElement("button"); btn.className = "showp"; btn.textContent = "Show prompt";
+  const pre = document.createElement("pre"); pre.className = "prompt"; pre.hidden = true;
+  pre.textContent = prompt.map(p => "[" + p.role + "]\n" + p.content).join("\n\n");
+  btn.onclick = () => { pre.hidden = !pre.hidden; btn.textContent = pre.hidden ? "Show prompt" : "Hide prompt"; };
+  m.appendChild(btn); m.appendChild(pre);
+}
+function welcome(){ add("bot", "Hi! Pick a prompting style above, then ask me anything. Try the same question in all four styles."); }
+
+function render(el, text){
+  if (!window.marked || !window.DOMPurify){ el.textContent = text; return; }
+  el.innerHTML = DOMPurify.sanitize(marked.parse(text, { breaks: true }));
+  el.classList.add("md");
+  el.querySelectorAll("table").forEach(t => {
+    const w = document.createElement("div"); w.className = "tw";
+    t.parentNode.insertBefore(w, t); w.appendChild(t);
+  });
+}
+
+async function send(text){
+  text = text.trim(); if (!text || busy) return;
+  busy = true; sendBtn.disabled = true; input.value = "";
+  add("user", text);
+  const m = add("bot", "Thinking...", INFO[mode][0]);
+  const b = m.querySelector(".bubble"); b.classList.add("typing");
+  try {
+    const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, mode }) });
+    const d = await r.json();
+    b.classList.remove("typing");
+    if (d.error){ b.textContent = "The server returned an error: " + d.error; b.classList.add("err"); }
+    else { render(b, d.reply); addPromptToggle(m, d.prompt_used); }
+  } catch (e){
+    b.classList.remove("typing"); b.classList.add("err");
+    b.textContent = "Can't reach the server. Start it with `python app.py` in your project folder, then send again.";
+  }
+  busy = false; sendBtn.disabled = false; log.scrollTop = log.scrollHeight; input.focus();
+}
+
+document.getElementById("modes").addEventListener("click", e => {
+  const b = e.target.closest(".mode"); if (!b) return;
+  mode = b.dataset.mode;
+  document.querySelectorAll(".mode").forEach(x => x.setAttribute("aria-pressed", x === b));
+  note();
+});
+document.getElementById("stickers").addEventListener("click", e => {
+  const s = e.target.closest(".sticker"); if (s) send(s.textContent);
+});
+sendBtn.onclick = () => send(input.value);
+input.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); send(input.value); } });
+document.getElementById("clear").onclick = () => { log.innerHTML = ""; welcome(); };
+note(); welcome();
+</script>
+</body>
+</html>
